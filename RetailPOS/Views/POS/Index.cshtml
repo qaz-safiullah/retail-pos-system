@@ -1,0 +1,234 @@
+﻿@{
+    ViewData["Title"] = "POS";
+}
+
+<h2 class="mb-4">Point of Sale</h2>
+
+<div class="row">
+    <!-- Left: Product Search -->
+    <div class="col-md-6">
+        <input type="text" id="searchBox" class="form-control"
+               placeholder="Search by name or barcode..." />
+
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="searchResults">
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Right: Cart -->
+    <div class="col-md-6">
+        <h4>Cart</h4>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody id="cartBody">
+            </tbody>
+        </table>
+
+        <h5 class="text-end">
+            Total: <span id="totalAmount">0.00</span>
+        </h5>
+
+        <div class="mb-3">
+            <label class="form-label">Payment Method</label>
+            <select id="paymentMethod" class="form-select">
+                <option value="Cash">Cash</option>
+                <option value="Card">Card</option>
+            </select>
+        </div>
+        <div class="mt-2">
+            <label class="form-label">Amount Received</label>
+            <input type="number" id="amountReceived" class="form-control" />
+        </div>
+
+        <div class="mt-2">
+            <strong>Change:</strong> Rs <span id="changeAmount">0</span>
+        </div>
+        <button id="placeOrderBtn" class="btn btn-success w-100 mt-3" onclick="placeOrder()">
+            Place Order
+        </button>
+
+    </div>
+</div>
+
+
+
+
+@section Scripts {
+    <script>
+        let cart = [];
+
+        const searchBox = document.getElementById("searchBox");
+        const searchResults = document.getElementById("searchResults");
+        const cartBody = document.getElementById("cartBody");
+        const totalAmount = document.getElementById("totalAmount");
+
+        // 🔍 Live search
+        searchBox.addEventListener("keyup", function () {
+            const term = this.value.trim();
+            if (term.length < 2) {
+                searchResults.innerHTML = "";
+                return;
+            }
+
+            fetch(`/POS/Search?term=${term}`)
+                .then(res => res.json())
+                .then(data => {
+                    searchResults.innerHTML = "";
+                    data.forEach(p => {
+                        searchResults.innerHTML += `
+                            <tr>
+                                <td>${p.name}</td>
+                                <td>${p.price}</td>
+                                <td>${p.stockQuantity}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"
+                                            onclick="addToCart(${p.productId}, '${p.name}', ${p.price})">
+                                        Add
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                });
+        });
+
+        // ➕ Add to cart
+        function addToCart(id, name, price) {
+            const item = cart.find(p => p.productId === id);
+
+            if (item) {
+                item.quantity++;
+            } else {
+                cart.push({
+                    productId: id,
+                    name: name,
+                    price: price,
+                    quantity: 1
+                });
+            }
+
+            renderCart();
+        }
+
+        // 🧾 Render cart
+        function renderCart() {
+            cartBody.innerHTML = "";
+            let total = 0;
+
+            cart.forEach(item => {
+                const sub = item.price * item.quantity;
+                total += sub;
+
+                cartBody.innerHTML += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary"
+                                    onclick="changeQty(${item.productId}, -1)">-</button>
+                            ${item.quantity}
+                            <button class="btn btn-sm btn-secondary"
+                                    onclick="changeQty(${item.productId}, 1)">+</button>
+                        </td>
+                        <td>${item.price}</td>
+                        <td>${sub.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            totalAmount.innerText = total.toFixed(2);
+        }
+
+        // ➕➖ Change quantity
+        function changeQty(id, delta) {
+            const item = cart.find(p => p.productId === id);
+            if (!item) return;
+
+            item.quantity += delta;
+            if (item.quantity <= 0) {
+                cart = cart.filter(p => p.productId !== id);
+            }
+
+            renderCart();
+        }
+    </script>
+
+    <script>
+        // Real-time change calculation
+        document.getElementById("amountReceived").addEventListener("input", function () {
+            const received = parseFloat(this.value) || 0;
+            const totalText = document.getElementById("totalAmount").innerText || "0";
+            const total = parseFloat(totalText.replace(/[^0-9.-]+/g, "")) || 0;
+
+            const change = received - total;
+            document.getElementById("changeAmount").innerText =
+                change > 0 ? change.toFixed(2) : "0";
+        });
+
+        function placeOrder() {
+            if (cart.length === 0) {
+                alert("Cart is empty!");
+                return;
+            }
+
+            const paymentMethod = document.getElementById("paymentMethod").value;
+            const amountReceived = parseFloat(document.getElementById("amountReceived").value) || 0;
+
+            const totalText = document.getElementById("totalAmount").innerText || "0";
+            const totalAmount = parseFloat(totalText.replace(/[^0-9.-]+/g, "")) || 0;
+
+            if (paymentMethod === "Cash" && amountReceived < totalAmount) {
+                alert("Amount received is less than total!");
+                return;
+            }
+
+            const orderData = {
+                cart: cart,
+                paymentMethod: paymentMethod,
+                amountReceived: paymentMethod === "Cash" ? amountReceived : 0
+            };
+
+            fetch('/POS/PlaceOrder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: JSON.stringify(orderData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.receiptUrl;
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Something went wrong while placing the order.");
+            });
+        }
+    </script>
+
+
+
+
+    
+}

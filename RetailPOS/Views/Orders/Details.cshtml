@@ -1,0 +1,65 @@
+﻿@model RetailPOS.Models.Order
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<h2>Order #@Model.OrderId</h2>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p><strong>Date:</strong> @Model.OrderDate</p>
+        <p><strong>Cashier:</strong> @Model.User?.Username</p>
+        <p><strong>Payment Method:</strong> @Model.PaymentMethod</p>
+    </div>
+</div>
+
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderItems)
+        {
+            <tr>
+                <td>@item.Product?.Name</td>
+                <td>@item.Quantity</td>
+                <td>Rs @item.UnitPrice</td>
+                <td>Rs @item.SubTotal</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h4 class="text-end">Total: Rs @Model.TotalAmount</h4>
+
+@{
+    string role = ViewBag.Role ?? "Cashier";
+    // string backAction = role == "Admin" ? "Index" : "MyOrders"; // MyOrders is the cashier-specific action
+}
+<!-- <a asp-action="backAction" class="btn btn-secondary">Back to Orders</a> -->
+<div class="mt-4">
+    @if (role == "Admin")
+    {
+        <a asp-action="Index" asp-controller="Orders" class="btn btn-secondary">
+            Back to Orders
+        </a>
+    }
+    else if (role == "Cashier")
+    {
+        <a asp-action="Dashboard" asp-controller="Cashier" class="btn btn-secondary">
+            Back to Dashboard
+        </a>
+    }
+</div>
+
+
+<div class="mt-3">
+    <button class="btn btn-primary" onclick="window.print()">Print Receipt</button>
+</div>
+

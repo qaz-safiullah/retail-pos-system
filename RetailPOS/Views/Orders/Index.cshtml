@@ -1,0 +1,39 @@
+﻿@model IEnumerable<RetailPOS.Models.Order>
+
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<h2 class="mb-4">Orders List</h2>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Cashier</th>
+            <th>Total</th>
+            <th>Payment</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>@order.OrderId</td>
+                <td>@order.OrderDate.ToString("dd-MM-yyyy HH:mm")</td>
+                <td>@order.User?.Username</td>
+                <td>Rs @order.TotalAmount</td>
+                <td>@order.PaymentMethod</td>
+                <td>
+                    <a class="btn btn-sm btn-info me-1"
+                       asp-action="Details"
+                       asp-route-id="@order.OrderId">
+                        View
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

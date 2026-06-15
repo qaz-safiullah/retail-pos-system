@@ -1,0 +1,67 @@
+﻿@model RetailPOS.Models.Order
+
+@{
+    ViewData["Title"] = "Receipt";
+}
+
+<h2>Receipt</h2>
+
+<p><strong>Order ID:</strong> @Model.OrderId</p>
+<p><strong>Date:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+<p><strong>Cashier:</strong> @Model.User?.Username</p>
+
+<hr />
+
+<h5>Payment Details</h5>
+
+<p>
+    <strong>Payment Method:</strong> @Model.PaymentMethod
+</p>
+
+@if (Model.PaymentMethod == "Cash")
+{
+    <p>
+        <strong>Amount Received:</strong>
+        Rs @Model.AmountReceived?.ToString("0.00")
+    </p>
+
+    <p>
+        <strong>Change:</strong>
+        Rs @Model.ChangeAmount?.ToString("0.00")
+    </p>
+}
+
+<hr />
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderItems)
+        {
+            <tr>
+                <td>@item.Product.Name</td>
+                <td>@item.Quantity</td>
+                <td>@item.UnitPrice.ToString("0.00")</td>
+                <td>@item.SubTotal.ToString("0.00")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h4 class="text-end">
+    Total: Rs @Model.TotalAmount.ToString("0.00")
+</h4>
+
+<div class="mt-3">
+    <button class="btn btn-primary" onclick="window.print()">Print Receipt</button>
+    <a class="btn btn-secondary" asp-controller="POS" asp-action="Index">
+        Back to POS
+    </a>
+</div>

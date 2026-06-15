@@ -1,0 +1,68 @@
+﻿@{
+    ViewData["Title"] = "Cashier Dashboard";
+}
+
+<h2 class="mb-4">Cashier Dashboard</h2>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card text-white bg-info shadow h-100">
+            <div class="card-body">
+                <h5 class="card-title">Today's Orders</h5>
+                <h3 class="card-text">@ViewBag.TodayOrders</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card text-white bg-success shadow h-100">
+            <div class="card-body">
+                <h5 class="card-title">Today's Sales</h5>
+                <h3 class="card-text">Rs @ViewBag.TodaySales</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a class="btn btn-primary btn-lg" href="/POS/Index">
+        Start New Sale
+    </a>
+</div>
+
+<h4 class="mt-5">Your Last 5 Orders</h4>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped text-center">
+    <thead class="table-dark">
+        <tr>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Total</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var o in ViewBag.LastOrders)
+        {
+            <tr>
+                <td>@o.OrderId</td>
+                <td>@o.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>Rs @o.TotalAmount</td>
+                <td>
+                    <a asp-controller="Orders"
+                       asp-action="Details"
+                       asp-route-id="@o.OrderId"
+                           class="btn btn-sm btn-info me-1">
+                        View
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+</div>
+
+

@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Sales Reports";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Sales Reports</h2>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <a asp-action="Daily" class="card text-decoration-none shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Daily Sales</h5>
+                    <p class="card-text text-muted">View sales for each day</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a asp-action="Monthly" class="card text-decoration-none shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Monthly Sales</h5>
+                    <p class="card-text text-muted">View sales per month</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a asp-action="TopProducts" class="card text-decoration-none shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Top Selling Products</h5>
+                    <p class="card-text text-muted">Check your best-selling products</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>

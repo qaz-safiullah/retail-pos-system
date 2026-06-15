@@ -1,0 +1,25 @@
+﻿@model IEnumerable<dynamic>
+
+<h2>Top Selling Products</h2>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Product</th>
+            <th>Quantity Sold</th>
+            <th>Total Revenue</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Product</td>
+                <td>@item.QuantitySold</td>
+                <td>Rs @item.Revenue</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Index" class="btn btn-secondary">Back</a>
